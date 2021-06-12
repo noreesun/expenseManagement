@@ -9,7 +9,7 @@ from typing import ForwardRef
 # ttk is theme of Tk
 
 GUI = Tk() # T upper case >> case sensitive
-GUI.title('โปรแกรมบันทึกค่าใช้จ่าย By Youngchin')
+GUI.title('โปรแกรมบันทึกค่าใช้จ่าย V.1.0.0 By Youngchin')
 GUI .geometry('600x700+500+50')  # +50 (x)+0(y) Fix Positon Display on Screen
 
 # Create Menu Bar
@@ -23,6 +23,7 @@ filemenu.add_command(label='Save AS')
 filemenu.add_command(label='Exit')
 # Help menu
 def About():
+    print('Print About Menu')
     messagebox.showwarning('About','This Software Create BY Youngchin')
 
 helpmenu = Menu(menubar,tearoff=0) #tearoff=0 ไม่ให้มีเส้น -- ใน list Menu
