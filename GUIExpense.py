@@ -9,8 +9,8 @@ from typing import ForwardRef
 # ttk is theme of Tk
 
 GUI = Tk() # T upper case >> case sensitive
-GUI.title('โปรแกรมบันทึกค่าใช้จ่าย V.1.0.0 By Youngchin')
-GUI .geometry('600x700+500+50')  # +50 (x)+0(y) Fix Positon Display on Screen
+GUI.title('โปรแกรมบันทึกค่าใช้จ่าย V.1.0.1 By Youngchin')
+GUI .geometry('800x700+500+50')  # +50 (x)+0(y) Fix Positon Display on Screen
 
 # Create Menu Bar
 menubar = Menu(GUI)
@@ -23,8 +23,7 @@ filemenu.add_command(label='Save AS')
 filemenu.add_command(label='Exit')
 # Help menu
 def About():
-    print('Print About Menu')
-    messagebox.showwarning('About','This Software Create BY Youngchin')
+    messagebox.showwarning('About','This Software Create V.1.0.1 BY Youngchin')
 
 helpmenu = Menu(menubar,tearoff=0) #tearoff=0 ไม่ให้มีเส้น -- ใน list Menu
 menubar.add_cascade(label='Help',menu=helpmenu)
@@ -107,10 +106,13 @@ def Save(event = None):
         #with คือ สั่งเปิดไฟล์ แล้วปิดอัติโนมัติ ,
         #a คือการ append data , w คือ การเขียนใหม่หมดทุกครั้ง
         #newline = '' >> ทำให้ข้อมูลไม่มีบันทัดว่าง
-        
-        with open('savedata.csv','a',encoding='utf-8',newline = '') as f :
+        stamp = datetime.datetime.now()
+        transactionid = stamp.strftime('%Y%m%d%H%M%f')
+        print(transactionid)
+
+        with open('savedata2.csv','a',encoding='utf-8',newline = '') as f :
             fw = csv.writer(f) #สร้างฟังก์ชั่นสำหรับเขียนข้อมูล
-            data = [expense,price,qty,totalprice,dateinsert]
+            data = [transactionid,expense,price,qty,totalprice,dateinsert]
             fw.writerow(data)
             
     # ทำให้ cursor กลับไปที่ตำแหน่งช่องกรอก
@@ -168,7 +170,7 @@ iconsave = PhotoImage(file='icon-save.png')
 #---------------End text 4 --------------------------
 #---------------Button Save --------------------------
 B2 = ttk.Button(F1,text=f'{"Save" : >{10}}',image=iconsave,compound='left',command = Save) # command คือ event เมื่อกดปุ่ม
-B2.pack(ipadx=30,ipady=6,pady=10)
+B2.pack(ipadx=20,ipady=6,pady=10)
 #---------------End Button Save --------------------------
 
 
@@ -180,7 +182,7 @@ result.pack(pady = 10)
 #------------------------End Tab1 ----------------------------
 #------------------------Tab2 ----------------------------
 F2= Frame(T2)
-F2.place(x=100,y=50)
+F2.place(x=20,y=50)
 mainicon2 = PhotoImage(file='icon-list-small.png')
 L = ttk.Label(T2,text = f'{"List ALL Expense" : >{10}}',image=mainicon2,compound='left',font=FONT1)
 L.pack()
@@ -190,7 +192,7 @@ L.pack()
 #MainIcon2.pack()
 
 def read_csv():
-    with open('savedata.csv',newline='',encoding='utf-8') as f: # open csv and auto close 
+    with open('savedata2.csv',newline='',encoding='utf-8') as f: # open csv and auto close 
         fr = csv.reader(f) # fr = filereader
         data = list(fr) #แปลง data ให้เป็น List
         # print(data)
@@ -220,7 +222,7 @@ def read_csv():
 # allrecord.pack(pady =5)
 
 # สร้าง table ด้วย Treeview
-header  = ['Item','Price','Qty','Total','Dateadd']
+header  = ['ID','Item','Price','Qty','Total','Dateadd']
 resulttb = ttk.Treeview(T2,columns=header,show='headings',height=10)
 resulttb.pack()
 
@@ -230,17 +232,35 @@ for hd in header: # วนเพื่อแสดง Header จะได้ไ�
 
 #resulttb.column('Item',width=10) กำหนดเองทีละ column
 
-headerwidth = [170,80,80,80,150] #กำหนด size ของ Header
+headerwidth = [130,200,60,60,80,160] #กำหนด size ของ Header
 for hd,W in zip(header,headerwidth): #วนเพื่อกำหนด size ของ Header จะได้ไม่ต้องกำหนดหลายบรรทัด
 	resulttb.column(hd,width=W)
+
+def DeleteRecord():
+    print('Delete')
+    select = resulttb.selection()
+    print(select)
+    data = resulttb.item(select)
+    data = data['values']
+    print(data)
+    transactionid = data[0]
+    print(transactionid)
+
+#Create Button Delete
+BDelete = ttk.Button(T2,text='Delete',command = DeleteRecord)
+BDelete.place(x=50,y=280)
+
 
 def update_table():
     resulttb.delete(*resulttb.get_children()) # คำสั่งลบข้อมูล * โดยไม่ต้องรัน Loop
 	# for c in resulttb.get_children():
     #     resulttb.delete(c)
-    data = read_csv()
-    for dt in data:
-        resulttb.insert('','end',value=dt)
+    try:
+        data = read_csv()
+        for dt in data:
+            resulttb.insert('','end',value=dt)
+    except:
+        print('No CSV file file to update')
 
 update_table()
 
