@@ -236,20 +236,44 @@ headerwidth = [130,200,60,60,80,160] #กำหนด size ของ Header
 for hd,W in zip(header,headerwidth): #วนเพื่อกำหนด size ของ Header จะได้ไม่ต้องกำหนดหลายบรรทัด
 	resulttb.column(hd,width=W)
 
+alltransaction = {}
+
+def UpdateCSV():
+    with open('savedata2.csv','w',newline='',encoding='utf-8') as f: # open csv and auto close 
+        fw = csv.writer(f) 
+        #เตรียมข้อมูลจาก All Transaction ให้กลายเป็น List
+        data = list(alltransaction.values())
+        # write multiple line from nest list
+        fw.writerows(data) # multiple line from nested list [[],[],[]]
+        print('Table was updated')
+
+        
 def DeleteRecord():
-    print('Delete')
-    select = resulttb.selection()
-    print(select)
-    data = resulttb.item(select)
-    data = data['values']
-    print(data)
-    transactionid = data[0]
-    print(transactionid)
+    check = messagebox.askyesno('Confirm?','คุณต้องการลบข้อมูลใช่หรือไม่?')
+    print('YES/NO:',check)
+
+    if check == True:
+        print('delete')
+        select = resulttb.selection()
+        #print(select)
+        data = resulttb.item(select)
+        data = data['values']
+        transactionid = data[0]
+        #print(transactionid)
+        #print(type(transactionid))
+        del alltransaction[str(transactionid)] # delete data in dict
+        #print(alltransaction)
+        UpdateCSV()
+        update_table()
+    else:
+        print('Cancel')
 
 #Create Button Delete
 BDelete = ttk.Button(T2,text='Delete',command = DeleteRecord)
 BDelete.place(x=50,y=280)
 
+# ใช้ปุ่มที่ Keyboard Delete
+resulttb.bind('<Delete>',DeleteRecord)
 
 def update_table():
     resulttb.delete(*resulttb.get_children()) # คำสั่งลบข้อมูล * โดยไม่ต้องรัน Loop
@@ -258,9 +282,13 @@ def update_table():
     try:
         data = read_csv()
         for dt in data:
-            resulttb.insert('','end',value=dt)
-    except:
+            #create transactiondata
+            alltransaction[dt[0]] = dt # d[0] = transactionid
+            resulttb.insert('',0,value=dt)
+        print(alltransaction)
+    except EXCEPTION as e:
         print('No CSV file file to update')
+        print('ERROR',e)
 
 update_table()
 
