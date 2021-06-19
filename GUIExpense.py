@@ -10,7 +10,19 @@ from typing import ForwardRef
 
 GUI = Tk() # T upper case >> case sensitive
 GUI.title('โปรแกรมบันทึกค่าใช้จ่าย V.1.0.1 By Youngchin')
-GUI .geometry('800x700+500+50')  # +50 (x)+0(y) Fix Positon Display on Screen
+#GUI .geometry('800x700+500+50')  # +50 (x)+0(y) Fix Positon Display on Screen
+
+# Start สร้างขนาดของ Popup แบบตามจอ และ event ที่เราคลิ๊ก
+w = 800
+h = 650
+    
+ws = GUI.winfo_screenwidth() #screen width
+hs = GUI.winfo_screenheight() #screen height
+    
+x = (ws/2) - (w/2)
+y = (hs/2) - (h/2) - 50
+    
+GUI.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
 
 # Create Menu Bar
 menubar = Menu(GUI)
@@ -247,7 +259,8 @@ def UpdateCSV():
         fw.writerows(data) # multiple line from nested list [[],[],[]]
         print('Table was updated')
 
-        
+
+#-------- Start Delete Record Function ----#       
 def DeleteRecord():
     check = messagebox.askyesno('Confirm?','คุณต้องการลบข้อมูลใช่หรือไม่?')
     print('YES/NO:',check)
@@ -275,6 +288,96 @@ BDelete.place(x=50,y=280)
 # ใช้ปุ่มที่ Keyboard Delete
 resulttb.bind('<Delete>',DeleteRecord)
 
+#-------- End Delete Record Function ----#
+
+#-------- Start Edit Record Function ----#
+def EditRecord():
+    print('Edit Record')
+    POPUP = Toplevel() # สร้าง POPUP โดยใช้ library Toplevel คล้ายๆกับ Tk()
+    POPUP.title('Edit Record')
+
+    # สร้างขนาดของ Popup แบบ Fix โดยมันจะอยู่ลอยๆ 
+    #POPUP.geometry('500x400')
+ 
+    # Start สร้างขนาดของ Popup แบบตามจอ และ event ที่เราคลิ๊ก
+    w = 500
+    h = 400
+    
+    ws = POPUP.winfo_screenwidth() #screen width
+    hs = POPUP.winfo_screenheight() #screen height
+    
+    x = (ws/2) - (w/2)
+    y = (hs/2) - (h/2) - 100
+    
+    POPUP.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
+
+    # End สร้างขนาดของ Popup แบบตามจอ และ event ที่เราคลิ๊ก
+
+    #------ Start สร้าง text ที่ใช้ในหน้าจอ-----------
+    #--------------- text 1 --------------------------
+    L = ttk.Label(POPUP,text = 'รายการค่าใช้จ่าย',font=FONT1).pack()
+    # StringVar() ตัวแปรสำหรับเก็บข้อมูลใน GUI
+    v_expense = StringVar() #ตัวแปรสำหรับเก็บข้อมูลใน GUI
+    E1 = ttk.Entry(POPUP,textvariable = v_expense,font = FONT2)
+    E1.pack()
+    #---------------End text 1 --------------------------
+
+    #---------------text 2 --------------------------
+    # StringVar() ตัวแปรสำหรับเก็บข้อมูลใน GUI
+    L = ttk.Label(POPUP,text = 'ราคา (บาท)',font=FONT1).pack()
+    v_price= StringVar() #ตัวแปรสำหรับเก็บข้อมูลใน GUI
+    E2 = ttk.Entry(POPUP,textvariable = v_price,font = FONT2)
+    E2.pack()
+    #---------------End text 2 --------------------------
+    #---------------text 3 --------------------------
+    # StringVar() ตัวแปรสำหรับเก็บข้อมูลใน GUI
+    L = ttk.Label(POPUP,text = 'จำนวน (ชิ้น)',font=FONT1).pack()
+    v_qty = StringVar() #ตัวแปรสำหรับเก็บข้อมูลใน GUI
+    E3 = ttk.Entry(POPUP,textvariable = v_qty,font = FONT2)
+    E3.pack()
+
+    def Edit():
+        #print(transactionid)
+        #print(alltransaction)
+        today = datetime.datetime.now().strftime('%a')
+        dateUpdate = datetime.datetime.now().strftime('%m/%d/%Y-{}, %H:%M:%S'.format(days[today]))
+        olddata = alltransaction[str(transactionid)]
+        print('OLD:',olddata)
+        v_expense_new = v_expense.get()
+        v_pice_new = float(v_price.get())
+        v_qty_new = float(v_qty.get())
+        total_new = v_pice_new * v_qty_new
+        newdata = (olddata[0],v_expense_new,v_pice_new,v_qty_new,total_new,dateUpdate)
+        alltransaction[str(transactionid)] =newdata
+        UpdateCSV()
+        update_table()
+        POPUP.destroy()
+
+    iconsave = PhotoImage(file='icon-save.png')
+    #---------------End text 4 --------------------------
+    #---------------Button Save --------------------------
+    B2 = ttk.Button(POPUP,text=f'{"Save" : >{10}}',image=iconsave,compound='left',command = Edit) # command คือ event เมื่อกดปุ่ม
+    B2.pack(ipadx=20,ipady=6,pady=10)
+    #---------------End Button Save --------------------------
+    
+    #------ Start สร้าง text ที่ใช้ในหน้าจอ-----------
+
+    #------ Start เลือดข้อมูลจาก record ที่เลือกแล้ว Set ข้อมูลเข้าช่อง textbox
+    select = resulttb.selection()
+    print(select)
+    data = resulttb.item(select)
+    data = data['values']
+    print(data)
+    transactionid = data[0]
+    #Set ข้อมูลเข้าช่อง textbox
+    v_expense.set(data[1])
+    v_price.set(data[2])
+    v_qty.set(data[3])
+    POPUP.mainloop()
+
+#-------- End Edit Record Function ----#
+
+
 def update_table():
     resulttb.delete(*resulttb.get_children()) # คำสั่งลบข้อมูล * โดยไม่ต้องรัน Loop
 	# for c in resulttb.get_children():
@@ -290,8 +393,21 @@ def update_table():
         print('No CSV file file to update')
         print('ERROR',e)
 
-update_table()
 
+######## Right Click Menu #########
+rightclick = Menu(GUI,tearoff=0)
+rightclick.add_command(label='Edit',command=EditRecord)
+rightclick.add_command(label='Delete',command=DeleteRecord)
+
+def menupopup(event):
+    #print position
+    print(event.x_root, event.y_root)
+    #display popup when Right Click
+    rightclick.post(event.x_root, event.y_root)
+
+resulttb.bind('<Button-3>',menupopup)
+
+update_table()
 #update_record()
 GUI.bind('<Tab>',lambda x: E2.focus())
 GUI.mainloop() # ทำให้ UI รันตลอดเวลา
